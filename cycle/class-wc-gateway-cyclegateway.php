@@ -334,6 +334,7 @@ function cycle_payment_gateway_init()
                     if($order) $order->add_order_note( __('Notification was received from the payment gateway.<br>Transaction - '  . $data['order_id'] .'.<br>Status: '. $status, 'woocommerce-cyclegateway') );
                     break;
                 case 'COMPLETED':
+                case 'OVERPAID':
                     $this->updateTransaction($data['order_id'], $status, 0);
                     if($order){
                         $order->add_order_note( __('Notification was received from the payment gateway.<br>Orderpaid, transaction - '  . $data['order_id'] .'.', 'woocommerce-cyclegateway') );

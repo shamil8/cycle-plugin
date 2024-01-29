@@ -161,7 +161,7 @@ function cycle_payment_gateway_init()
 
         public function after_order_details($order)
          {
-            var_dump('after_order_details', $order); // TODO:: REMOVE IT!
+            var_dump('after_order_detailssss', $order); // TODO:: REMOVE IT!
             $order_id = $order->get_order_number();
             $transactions = $this->getTransactions($order_id, 0);
 
@@ -250,31 +250,31 @@ function cycle_payment_gateway_init()
 
             $output = $this->gatewayClient->createPayment($jsonData);
             $outputCode = (int)$output['code'];
+            $outputBody = json_decode($output['body'], true);
 
             self::log($order_id . ': Output code: ' . $outputCode);
+            echo '<pre>' . var_dump('receipt_pagee', $output) . '</pre>';  // TODO:: REMOVE IT!
 
             if($outputCode != 201) {
+                self::log("Failed to connect to server, code:" . $outputCode);
+
+                if ($outputBody && isset($outputBody['message'])) {
+                    wc_add_notice(__($outputBody['message'], 'woocommerce-cyclegateway'), 'error');
+                } else {
+                    wc_add_notice(__('Failed to connect to the server. Please try again later.', 'woocommerce-cyclegateway'), 'error');
+                }
+
                 exit;
             }
 
-            if (isset($output['body'])) {
-                $gatewayOutputBody = json_decode($output['body'], true);
-            }
-            else {
-                self::log("ERR: no output body");
-                exit;
-            }
-
-            self::log($order_id . ": Self_hosted, POST, 201");
-
-            $this->addTransaction($order_id, $gatewayOutputBody['result']['id'], $jsonData);
+            $this->addTransaction($order_id, $outputBody['result']['id'], $jsonData);
 
             $wooOrderStatus = 'pending';
             $messageEntity = $this->setWooNotice($wooOrderStatus);
 
             $order->update_status($wooOrderStatus, $messageEntity['string']);
 
-            $gatewayProcessPageUrl = $gatewayOutputBody['result']['successUrl'];
+            $gatewayProcessPageUrl = $outputBody['result']['successUrl'];
 
             if (!$gatewayProcessPageUrl) {
                 self::log("receipt_page, BAD Location : " . $order_id);
@@ -285,7 +285,7 @@ function cycle_payment_gateway_init()
             $gatewayProcessPageUrl = esc_url($gatewayProcessPageUrl);
 
             $order->update_status('pending');
-            $order->add_order_note( __('Transaction created - '  . $gatewayOutputBody['result']['id'] .'. Waiting for payment.', 'woocommerce-cyclegateway') );
+            $order->add_order_note( __('Transaction created - '  . $outputBody['result']['id'] .'. Waiting for payment.', 'woocommerce-cyclegateway') );
 
             wp_redirect($gatewayProcessPageUrl);
             exit;

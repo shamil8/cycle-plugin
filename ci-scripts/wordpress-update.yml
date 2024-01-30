@@ -1,0 +1,7 @@
+---
+- name: Update Wordpress
+  hosts: all
+  gather_facts: True
+
+  roles:
+    - { role: wordpress-update }

@@ -1,0 +1,44 @@
+---
+# tasks file for backend-update
+- name: Remove old backup dir
+  file:
+    path: '{{ BACKEND_BIN }}_backup'
+    state: absent
+
+- name: Create backup dir
+  file:
+    path: '{{ BACKEND_BIN }}_backup'
+    state: directory
+    recurse: yes
+    mode: '0777'
+  ignore_errors: true
+
+- name: Copy old files to backup dir
+  copy:
+    src: '{{ BACKEND_BIN }}/'
+    dest: '{{ BACKEND_BIN }}_backup/'
+    remote_src: yes
+
+- name: Create backend dir for git code
+  file:
+    path: '{{ BACKEND_BIN }}_git'
+    state: directory
+    recurse: yes
+
+- name: Upload backend files
+  synchronize:
+    src: '{{ SRC_DIR }}'
+    dest: '{{ BACKEND_BIN }}_git'
+  register: copyfiles
+
+- name: Init docker-compose
+  template:
+    src: ./docker-compose.yml.j2
+    dest: '{{ BACKEND_BIN }}_git/docker-compose.yml'
+
+- name: Stop existing containers
+  shell: docker-compose -f '{{ BACKEND_BIN }}_git/docker-compose.yml' stop
+  ignore_errors: true
+
+- name: Start new containers
+  shell: docker-compose -f '{{ BACKEND_BIN }}_git/docker-compose.yml' up -d

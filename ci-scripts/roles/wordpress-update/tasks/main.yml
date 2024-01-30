@@ -11,13 +11,13 @@
     state: directory
     recurse: yes
     mode: '0777'
-  ignore_errors: true
 
 - name: Copy old files to backup dir
   copy:
     src: '{{ BACKEND_BIN }}/'
     dest: '{{ BACKEND_BIN }}_backup/'
     remote_src: yes
+  ignore_errors: true
 
 - name: Create backend dir for git code
   file:

@@ -28,11 +28,11 @@ jobs:
         run: |
           chmod 700 ci-scripts
           cd ci-scripts
-          ansible-playbook -i "${{ secrets.REMOTE_HOST_MAIN }}" ${{ secrets.ANSIBLE_DEBUG_LEVEL }} -e "ansible_user=${{ secrets.REMOTE_USER_MAIN }} ansible_port=${{ secrets.REMOTE_PORT_MAIN }} \
-          BACKEND_BIN=${{ secrets.BACKEND_BIN }} \
+          ansible-playbook -i "${{ secrets.REMOTE_HOST_MAIN }}" ${{ secrets.ANSIBLE_DEBUG_LEVEL }} -e "ansible_user=${{ vars.REMOTE_USER_MAIN }} ansible_port=${{ vars.REMOTE_PORT_MAIN }} \
+          BACKEND_BIN=${{ vars.BACKEND_BIN }} \
 
           DB_ROOT_PASS=${{ secrets.DB_ROOT_PASS }} \
           DB_USER_PASS=${{ secrets.DB_USER_PASS }} \
-          
+
           SRC_DIR=${{ github.workspace }}/" backend-update.yml;
     timeout-minutes: 15

@@ -16,6 +16,15 @@ services:
     ports:
       - "3306:3306"
 
+  adminer:
+    image: adminer:latest
+    container_name: wordpress-adminer
+    links:
+      - db
+    restart: always
+    ports:
+      - "8085:8080" 
+
   wordpress:
     depends_on:
       - db

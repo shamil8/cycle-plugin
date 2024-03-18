@@ -255,6 +255,20 @@ function cycle_payment_gateway_init()
             self::log($order_id . ': Output code: ' . $outputCode);
             echo '<pre>' . var_dump('receipt_pagee', $output) . '</pre>';  // TODO:: REMOVE IT!
 
+            // 489 -- order already exists with that custom_id
+            if ($outputCode === 489) {
+                $gatewayProcessPageUrl = $outputBody['message']['paymentUrl'];
+
+                if (!$gatewayProcessPageUrl) {
+                    self::log("receipt_page, BAD Location : " . $order_id);
+                    wc_add_notice( __('Location value not defined. ', 'woocommerce-cyclegateway') . __('Order ID: ', 'woocommerce-cyclegateway') . $order_id, 'error' );
+                    $gatewayProcessPageUrl = $this->get_return_url($order);
+                }
+
+                wp_redirect($gatewayProcessPageUrl);
+                exit;
+            }
+
             if($outputCode != 201) {
                 self::log("Failed to connect to server, code:" . $outputCode);
 

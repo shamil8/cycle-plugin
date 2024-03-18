@@ -1,0 +1,47 @@
+version: '3.3'
+
+services:
+  db:
+    image: mysql:5.7
+    platform: linux/amd64
+    container_name: wordpress-mysql
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: {{ DB_ROOT_PASS }}
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: {{ DB_USER_PASS }}
+    ports:
+      - "3306:3306"
+
+  adminer:
+    image: adminer:latest
+    container_name: wordpress-adminer
+    links:
+      - db
+    restart: always
+    ports:
+      - "8085:8080" 
+
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    container_name: wordpress
+    ports:
+      - "8000:80"
+    volumes:
+      # automatically configure the cycle datasource
+      - ./cycle/:/var/www/html/wp-content/plugins/cycle/
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: {{ DB_USER_PASS }}
+      WORDPRESS_DB_NAME: wordpress
+      # debug mode
+      WORDPRESS_DEBUG: 1
+volumes:
+  db_data: {}
